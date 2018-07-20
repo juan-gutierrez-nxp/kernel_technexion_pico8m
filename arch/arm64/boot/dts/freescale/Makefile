@@ -62,7 +62,8 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MQ) += fsl-imx8mq-ddr3l-arm2.dtb \
 				 fsl-imx8mq-evk-drm.dtb \
 				 pico-8m.dtb \
 				 pico-8m-dcss-ili9881c.dtb \
-				 wand-pi-8m.dtb
+				 wand-pi-8m.dtb \
+				 pico-8m-voicehat.dtb
 
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)
