@@ -94,6 +94,83 @@
 	};
 };
 
+&i2c3 { 
+
+	clock-frequency = <100000>;
+
+	pca9955: pca9955 {
+	compatible = "nxp,pca9955";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x60>;
+
+     blue@0 {
+		label = "blue0";
+		reg = <0>;
+		linux,default-trigger = "none";
+	 };
+	 green@1 {
+		label = "green0";
+		reg = <1>;
+		linux,default-trigger = "none";
+	 };
+	 red@2 {
+		label = "red0";
+		reg = <2>;
+		linux,default-trigger = "none";
+	 };
+
+	 blue@3 {
+		label = "blue1";
+		reg = <3>;
+		linux,default-trigger = "none";
+	 };
+	 green@4 {
+		label = "green1";
+		reg = <4>;
+		linux,default-trigger = "none";
+	 };
+	 red@5 {
+		label = "red1";
+		reg = <5>;
+		linux,default-trigger = "none";
+	 };
+
+     blue@6 {
+        label = "blue2";
+        reg = <6>;
+        linux,default-trigger = "none";
+     };
+     green@7 {
+        label = "green2";
+        reg = <7>;
+        linux,default-trigger = "none";
+     };
+     red@8 {
+        label = "red2";
+        reg = <8>;
+        linux,default-trigger = "none";
+     };
+
+     blue@9 {
+        label = "blue3";
+        reg = <9>;
+        linux,default-trigger = "none";
+     };
+     green@10 {
+        label = "green3";
+        reg = <10>;
+        linux,default-trigger = "none";
+     };
+     red@11 {
+        label = "red3";
+        reg = <11>;
+        linux,default-trigger = "none";
+     };
+
+	};
+};
+
 &sai2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai2>;
