@@ -22,11 +22,10 @@
 		i2c1 = &i2c2;
 		i2c2 = &i2c3;
 		i2c3 = &i2c4;
-    };
+	};
 
 	sound_record: codec {
 		compatible = "knowles,sph0645";
-		
 	};
 
 	sound@1 {
@@ -42,7 +41,7 @@
 			"DMIC2", "Mic",
 			"DMIC3", "Mic",
 			"DMIC4", "Mic";
-	};
+		};
 
 	sound@2 {
 		compatible = "nxp,imx-audio-sph0645", "nxp,imx-sph0645";
@@ -58,32 +57,30 @@
 		i2s-controller = <&sai2>;
 		status = "okay";
 	};
-
 };
 
 &iomuxc {
 	pinctrl-names = "default";
 
 	pico-8m  {
+		pinctrl_sai2: sai2grp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_SAI2_TXFS_SAI2_TX_SYNC		0xd6
+				MX8MQ_IOMUXC_SAI2_TXC_SAI2_TX_BCLK 		0xd6
+				MX8MQ_IOMUXC_SAI2_MCLK_SAI2_MCLK		0xd6
+				MX8MQ_IOMUXC_SAI2_TXD0_SAI2_TX_DATA0	0xd6
+				MX8MQ_IOMUXC_NAND_WE_B_GPIO3_IO17		0xd6
+				MX8MQ_IOMUXC_SAI2_RXD0_SAI2_RX_DATA0	0x0f
+			>;
+		};
 
-        pinctrl_sai2: sai2grp {
-            fsl,pins = <
-                MX8MQ_IOMUXC_SAI2_TXFS_SAI2_TX_SYNC 0xd6
-                MX8MQ_IOMUXC_SAI2_TXC_SAI2_TX_BCLK  0xd6
-                MX8MQ_IOMUXC_SAI2_MCLK_SAI2_MCLK    0xd6
-                MX8MQ_IOMUXC_SAI2_TXD0_SAI2_TX_DATA0    0xd6
-                MX8MQ_IOMUXC_NAND_WE_B_GPIO3_IO17    0xd6
-                MX8MQ_IOMUXC_SAI2_RXD0_SAI2_RX_DATA0    0x0f
-            >;
-        };
-
-        pinctrl_sai3: sai3grp {
-            fsl,pins = <
-                MX8MQ_IOMUXC_SAI3_TXFS_SAI3_TX_SYNC 0xd6
-                MX8MQ_IOMUXC_SAI3_TXC_SAI3_TX_BCLK  0xd6
-                MX8MQ_IOMUXC_SAI3_RXD_SAI3_RX_DATA0 0xd6
-            >;
-        };
+		pinctrl_sai3: sai3grp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_SAI3_TXFS_SAI3_TX_SYNC	0xd6
+				MX8MQ_IOMUXC_SAI3_TXC_SAI3_TX_BCLK	0xd6
+				MX8MQ_IOMUXC_SAI3_RXD_SAI3_RX_DATA0	0xd6
+			>;
+		};
 	};
 };
 
@@ -95,6 +92,7 @@
 		irq-gpio = <&gpio4 24 GPIO_ACTIVE_HIGH>; //GPIO_P35
 		clocks = <&clk IMX8MQ_AUDIO_PLL1>;
 	};
+
 	tfa98xx_right: tfa98xx_right@35 {
 		compatible = "nxp,tfa98xx";
 		reg = <0x35>;
@@ -102,80 +100,84 @@
 	};
 };
 
-&i2c3 { 
-
-	clock-frequency = <100000>;
-
+&i2c3 {
 	pca9955: pca9955 {
-	compatible = "nxp,pca9955";
-	#address-cells = <1>;
-	#size-cells = <0>;
-	reg = <0x60>;
+		compatible = "nxp,pca9955";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x60>;
 
-     blue@0 {
-		label = "blue0";
-		reg = <0>;
-		linux,default-trigger = "none";
-	 };
-	 green@1 {
-		label = "green0";
-		reg = <1>;
-		linux,default-trigger = "none";
-	 };
-	 red@2 {
-		label = "red0";
-		reg = <2>;
-		linux,default-trigger = "none";
-	 };
+		blue@0 {
+			label = "blue0";
+			reg = <0>;
+			linux,default-trigger = "none";
+		};
 
-	 blue@3 {
-		label = "blue1";
-		reg = <3>;
-		linux,default-trigger = "none";
-	 };
-	 green@4 {
-		label = "green1";
-		reg = <4>;
-		linux,default-trigger = "none";
-	 };
-	 red@5 {
-		label = "red1";
-		reg = <5>;
-		linux,default-trigger = "none";
-	 };
+		green@1 {
+			label = "green0";
+			reg = <1>;
+			linux,default-trigger = "none";
+		};
 
-     blue@6 {
-        label = "blue2";
-        reg = <6>;
-        linux,default-trigger = "none";
-     };
-     green@7 {
-        label = "green2";
-        reg = <7>;
-        linux,default-trigger = "none";
-     };
-     red@8 {
-        label = "red2";
-        reg = <8>;
-        linux,default-trigger = "none";
-     };
+		red@2 {
+			label = "red0";
+			reg = <2>;
+			linux,default-trigger = "none";
+		};
 
-     blue@9 {
-        label = "blue3";
-        reg = <9>;
-        linux,default-trigger = "none";
-     };
-     green@10 {
-        label = "green3";
-        reg = <10>;
-        linux,default-trigger = "none";
-     };
-     red@11 {
-        label = "red3";
-        reg = <11>;
-        linux,default-trigger = "none";
-     };
+		blue@3 {
+			label = "blue1";
+			reg = <3>;
+			linux,default-trigger = "none";
+		};
 
+		green@4 {
+			label = "green1";
+			reg = <4>;
+			linux,default-trigger = "none";
+		};
+
+		red@5 {
+			label = "red1";
+			reg = <5>;
+			linux,default-trigger = "none";
+		};
+
+		blue@6 {
+			label = "blue2";
+			reg = <6>;
+			linux,default-trigger = "none";
+		};
+
+		green@7 {
+			label = "green2";
+			reg = <7>;
+			linux,default-trigger = "none";
+		};
+
+		red@8 {
+			label = "red2";
+			reg = <8>;
+			linux,default-trigger = "none";
+		};
+
+		blue@9 {
+			label = "blue3";
+			reg = <9>;
+			linux,default-trigger = "none";
+		};
+
+		green@10 {
+			label = "green3";
+			reg = <10>;
+			linux,default-trigger = "none";
+		};
+
+		red@11 {
+			label = "red3";
+			reg = <11>;
+			linux,default-trigger = "none";
+		};
 	};
 };
 
@@ -183,7 +185,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai2>;
 	assigned-clocks = <&clk IMX8MQ_CLK_SAI2_SRC>,
-			<&clk IMX8MQ_CLK_SAI2_DIV>;
+		<&clk IMX8MQ_CLK_SAI2_DIV>;
 	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
 	assigned-clock-rates = <0>, <49152000>;
 	status = "okay";
@@ -193,25 +195,25 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sai3>;
 	assigned-clocks = <&clk IMX8MQ_CLK_SAI3_SRC>,
-			<&clk IMX8MQ_CLK_SAI3_DIV>;
+		<&clk IMX8MQ_CLK_SAI3_DIV>;
 	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
 	assigned-clock-rates = <0>, <24576000>;
 	status = "okay";
 };
 
 &dcss {
-    status = "disabled";
+	status = "disabled";
 };
 
 &hdmi {
-    status = "disabled";
+	status = "disabled";
 };
 
 &gpu {
-    status = "disabled";
+	status = "disabled";
 };
 
 &vpu {
-    status = "disabled";
+	status = "disabled";
 };
 
