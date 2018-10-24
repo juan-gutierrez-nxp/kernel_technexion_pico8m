@@ -34,14 +34,13 @@
 		cpu-dai = <&sai2>;
 		ssi-controller = <&sai2>;
 		nxp,audio-codec = <&tfa98xx_left &tfa98xx_right>;
-		clocks = <&clk IMX8MQ_AUDIO_PLL1>;
 		nxp,audio-routing =
 			"Speaker", "OUTL",
 			"DMIC1", "Mic",
 			"DMIC2", "Mic",
 			"DMIC3", "Mic",
 			"DMIC4", "Mic";
-		};
+	};
 
 	sound@2 {
 		compatible = "nxp,imx-audio-sph0645", "nxp,imx-sph0645";
