@@ -41,12 +41,10 @@ static struct snd_pcm_hw_constraint_list imx_tfa98xx_rate_constraints = {
 };
 
 struct snd_soc_card_drvdata_imx_tfa {
-	struct clk *mclk;
 	struct snd_soc_dai_link *dai;
 	struct snd_soc_card card;
 	char codec_dai_name[DAI_NAME_SIZE];
 	char platform_name[DAI_NAME_SIZE];
-	unsigned int clk_frequency;
 	int pstreams;
 	int cstreams;
 };
@@ -59,15 +57,10 @@ static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
 		snd_soc_card_get_drvdata(soc_card);
 	int ret;
 
-	pr_info("\n");
-
 	ret = snd_pcm_hw_constraint_list(substream->runtime, 0,
 			SNDRV_PCM_HW_PARAM_RATE, &imx_tfa98xx_rate_constraints);
 	if (ret)
 		return ret;
-
-	if (drvdata->mclk)
-		return clk_prepare_enable(drvdata->mclk);
 
 	return 0;
 }
@@ -78,10 +71,6 @@ static void imx_tfa98xx_shutdown(struct snd_pcm_substream *substream)
 	struct snd_soc_card *soc_card = rtd->card;
 	struct snd_soc_card_drvdata_imx_tfa *drvdata =
 		snd_soc_card_get_drvdata(soc_card);
-
-	pr_info("\n");
-	if (drvdata->mclk)
-		clk_disable_unprepare(drvdata->mclk);
 }
 
 static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
@@ -255,7 +244,6 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	struct i2c_client *codec_dev;
 	struct snd_soc_dai_link *dai;
 	struct snd_soc_card_drvdata_imx_tfa *drvdata = NULL;
-	struct clk *mclk;
 	int ret = 0;
 	int i, num_codecs;
 
@@ -332,29 +320,12 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	if (!dai->platform_name)
 		dai->platform_of_node = dai->cpu_of_node;
 
-	mclk = devm_clk_get(&pdev->dev, NULL);
-	if (PTR_ERR(mclk) == -EPROBE_DEFER) {
-		pr_info("getting clk defered\n");
-		return -EPROBE_DEFER;
-	} else if (IS_ERR(mclk)) {
-		dev_dbg(&pdev->dev, "clock not found.\n");
-		mclk = NULL;
-	}
-
 	drvdata = devm_kzalloc(&pdev->dev, sizeof(*drvdata), GFP_KERNEL);
 	if (!drvdata) {
 		ret = -ENOMEM;
 		goto fail;
 	}
 
-	if (mclk) {
-		pr_info("Reference clock found: %s @ %ld\n",
-			__clk_get_name(mclk),clk_get_rate(mclk));
-		clk_prepare(mclk);
-		clk_enable(mclk);
-		drvdata->mclk = mclk;
-	}
-	drvdata->clk_frequency = clk_get_rate(drvdata->mclk);
 	drvdata->dai = dai;
 
 	platform_set_drvdata(pdev, &drvdata->card);
@@ -383,10 +354,6 @@ static int imx_tfa98xx_remove(struct platform_device *pdev)
 	struct snd_soc_card_drvdata_imx_tfa *drvdata =
 				snd_soc_card_get_drvdata(card);
 
-	pr_info("\n");
-
-	if (drvdata->mclk)
-		clk_disable(drvdata->mclk);
 
 	return 0;
 }
