@@ -31,9 +31,8 @@
 	sound@1 {
 		compatible = "nxp,imx-audio-tfa98xx", "nxp,imx-tfa98xx";
 		nxp,model = "TFA9912";
-		cpu-dai = <&sai2>;
-		ssi-controller = <&sai2>;
-		nxp,audio-codec = <&tfa98xx_left &tfa98xx_right>;
+		audio-cpu = <&sai2>;
+		audio-codec = <&tfa98xx_left>, <&tfa98xx_right>;
 		nxp,audio-routing =
 			"Speaker", "OUTL",
 			"DMIC1", "Mic",
