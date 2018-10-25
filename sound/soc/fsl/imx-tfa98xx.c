@@ -45,10 +45,6 @@ struct snd_soc_card_drvdata_imx_tfa {
 	struct snd_soc_card card;
 	struct snd_soc_codec_conf *codec_conf;
 	int num_codec_conf;
-	char codec_dai_name[DAI_NAME_SIZE];
-	char platform_name[DAI_NAME_SIZE];
-	int pstreams;
-	int cstreams;
 };
 
 static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
@@ -65,14 +61,6 @@ static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
 		return ret;
 
 	return 0;
-}
-
-static void imx_tfa98xx_shutdown(struct snd_pcm_substream *substream)
-{
-	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_card *soc_card = rtd->card;
-	struct snd_soc_card_drvdata_imx_tfa *drvdata =
-		snd_soc_card_get_drvdata(soc_card);
 }
 
 static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
@@ -93,6 +81,7 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 		dev_err(cpu_dai->dev, "failed to set cpu dai fmt\n");
 		return ret;
 	}
+#if 0
 	ret = snd_soc_dai_set_fmt(rtd->codec_dai, SND_SOC_DAIFMT_I2S
 			| SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFS);
 	
@@ -100,88 +89,21 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 		dev_err(cpu_dai->dev, "failed to set codec dai fmt\n");
 		return ret;
 	}
+#endif
 
 	ret = snd_soc_dai_set_tdm_slot(cpu_dai, 0, 0, 2, params_width(params));
 	if (ret) {
 		dev_err(cpu_dai->dev, "failed to set cpu dai tdm slot: %d\n", ret);
 		return ret;
 	}
-	ret = snd_soc_dai_set_sysclk(cpu_dai, 0, 0, SND_SOC_CLOCK_OUT);
-	if (ret) {
-		dev_err(cpu_dai->dev, "failed to set cpu sysclk: %d\n", ret);
-		return ret;
-	}
 
 	return ret;
 }
 
-static int imx_tfa98xx_hw_free(struct snd_pcm_substream *substream)
-{
-	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_card *soc_card = rtd->card;
-	struct snd_soc_card_drvdata_imx_tfa *drvdata =
-		snd_soc_card_get_drvdata(soc_card);
-
-	if (drvdata->pstreams != 0 || drvdata->cstreams != 0)
-		return 0;
-
-	return 0;
-}
-
-static int imx_tfa98xx_trigger(struct snd_pcm_substream *stream, int cmd)
-{
-	struct snd_soc_pcm_runtime *rtd = stream->private_data;
-	struct snd_soc_card_drvdata_imx_tfa *drvdata =
-		snd_soc_card_get_drvdata(rtd->card);
-	int ret = 0;
-
-	pr_info("\n");
-	switch (cmd) {
-	case SNDRV_PCM_TRIGGER_START:
-		if (stream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-			drvdata->pstreams++;
-		else
-			drvdata->cstreams++;
-		break;
-	case SNDRV_PCM_TRIGGER_STOP:
-		if (stream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-			if (drvdata->pstreams > 0)
-				drvdata->pstreams--;
-			else
-				pr_err("Error in playback streams count\n");
-		} else {
-			if (drvdata->cstreams > 0)
-				drvdata->cstreams--;
-			else
-				pr_err("Error in capture streams count\n");
-		}
-		break;
-	default:
-		ret = -EINVAL;
-		break;
-	}
-
-	return 0;
-}
-
 static struct snd_soc_ops imx_tfa98xx_ops = {
 	.startup = imx_tfa98xx_startup,
-	.shutdown = imx_tfa98xx_shutdown,
 	.hw_params = imx_tfa98xx_hw_params,
-	.hw_free = imx_tfa98xx_hw_free,
-	.trigger = imx_tfa98xx_trigger,
 };
-
-static int imx_tfa98xx_init(struct snd_soc_pcm_runtime *rtd)
-{
-	struct snd_soc_card_drvdata_imx_tfa *data = snd_soc_card_get_drvdata(rtd->card);;
-	struct device *dev = rtd->card->dev;
-
-	pr_info("\n");
-	dev_dbg(rtd->card->dev, "%s,%d: dai_init\n", __FUNCTION__, __LINE__);
-
-	return 0;
-}
 
 static void *tfa_devm_kstrdup(struct device *dev, char *buf)
 {
