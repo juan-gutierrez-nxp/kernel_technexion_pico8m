@@ -71,7 +71,6 @@
 				MX8MQ_IOMUXC_SAI2_TXD0_SAI2_TX_DATA0	0xd6
 				MX8MQ_IOMUXC_SAI2_RXD0_SAI2_RX_DATA0	0xd6
 				MX8MQ_IOMUXC_NAND_WE_B_GPIO3_IO17		0x19 /* rst */
-				MX8MQ_IOMUXC_ECSPI1_MISO_GPIO5_IO8		0x19 /* irq */
 			>;
 		};
 
@@ -90,7 +89,6 @@
 		compatible = "nxp,tfa98xx";
 		reg = <0x34>;
 		reset-gpio = <&gpio3 17 GPIO_ACTIVE_HIGH>;
-		irq-gpio = <&gpio5 18 GPIO_ACTIVE_HIGH>;
 	};
 
 	tfa98xx_right: tfa98xx_right@35 {
