@@ -43,17 +43,9 @@
 
 	sound@2 {
 		compatible = "nxp,imx-audio-sph0645", "nxp,imx-sph0645";
-		nxp,model = "SPH0645";
-		cpu-dai = <&sai3>;
-		ssi-controller = <&sai3>;
-		nxp,audio-codec = <&sound_record>;
-		clocks = <&clk IMX8MQ_AUDIO_PLL1>;
-	};
-
-	sound-ffkdsp {
-		compatible = "rpi,ffki2sdsp-soc";
-		i2s-controller = <&sai2>;
-		status = "okay";
+		model = "SPH0645";
+		audio-cpu = <&sai3>;
+		audio-codec = <&sound_record>;
 	};
 };
 
