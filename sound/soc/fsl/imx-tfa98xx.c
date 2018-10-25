@@ -70,28 +70,30 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 	struct snd_soc_card_drvdata_imx_tfa *data = snd_soc_card_get_drvdata(rtd->card);
 	u32 channels = params_channels(params);
-	u32 rate = params_rate(params);
-	u32 bclk = rate * channels * 32;
-	int ret = 0;
+	unsigned int fmt;
+	int ret;
+
+	fmt = SND_SOC_DAIFMT_DSP_B | SND_SOC_DAIFMT_NB_NF |
+		SND_SOC_DAIFMT_CBS_CFS;
 
 	/* set cpu DAI configuration */
-	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S
-			| SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFS);
+	ret = snd_soc_dai_set_fmt(cpu_dai, fmt);
 	if (ret) {
 		dev_err(cpu_dai->dev, "failed to set cpu dai fmt\n");
 		return ret;
 	}
-#if 0
-	ret = snd_soc_dai_set_fmt(rtd->codec_dai, SND_SOC_DAIFMT_I2S
-			| SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFS);
-	
+
+	fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
+		SND_SOC_DAIFMT_CBS_CFS;
+
+	ret = snd_soc_dai_set_fmt(rtd->codec_dai, fmt);
 	if (ret) {
 		dev_err(cpu_dai->dev, "failed to set codec dai fmt\n");
 		return ret;
 	}
-#endif
 
-	ret = snd_soc_dai_set_tdm_slot(cpu_dai, 0, 0, 2, params_width(params));
+	ret = snd_soc_dai_set_tdm_slot(cpu_dai, BIT(channels) -1,
+			BIT(channels) - 1, 2, params_physical_width(params));
 	if (ret) {
 		dev_err(cpu_dai->dev, "failed to set cpu dai tdm slot: %d\n", ret);
 		return ret;
