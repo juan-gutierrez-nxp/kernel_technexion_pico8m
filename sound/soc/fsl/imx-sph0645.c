@@ -243,7 +243,7 @@ static int imx_sph0645_probe(struct platform_device *pdev)
 
 	imx_sph0645_soc_card.dev = &pdev->dev;
 
-	cpu_np = of_parse_phandle(pdev->dev.of_node, "cpu-dai", 0);
+	cpu_np = of_parse_phandle(pdev->dev.of_node, "audio-cpu", 0);
 	if (!cpu_np) {
 		dev_err(&pdev->dev, "cpu dai phandle missing or invalid\n");
 		ret = -EINVAL;
@@ -256,10 +256,12 @@ static int imx_sph0645_probe(struct platform_device *pdev)
 		ret = -EINVAL;
 		goto fail;
 	}
-	ret = snd_soc_of_parse_card_name(&imx_sph0645_soc_card, "nxp,model");
+
+	ret = snd_soc_of_parse_card_name(&imx_sph0645_soc_card, "model");
 	if (ret)
 		goto fail;;
-	num_codecs = of_count_phandle_with_args(np, "nxp,audio-codec", NULL);
+
+	num_codecs = of_count_phandle_with_args(np, "audio-codec", NULL);
 	if (num_codecs < 1) {
 		ret = -EINVAL;
 		goto fail;
@@ -282,20 +284,17 @@ static int imx_sph0645_probe(struct platform_device *pdev)
 		int len;
 		char name[18];
 
-		codecs[i].of_node = of_parse_phandle(np, "nxp,audio-codec", i);
+		codecs[i].of_node = of_parse_phandle(np, "audio-codec", i);
 		snprintf(name, sizeof(name), "sph0645");
 		codecs[i].dai_name = tfa_devm_kstrdup(&pdev->dev, name);
 	}
+
 	dai = &imx_dai_sph0645[0];
 	dai->platform_of_node = cpu_np;
 	dai->codecs = codecs;
 	dai->cpu_dai_name = dev_name(&cpu_pdev->dev);
 	dai->num_codecs = num_codecs;
-	dai->cpu_of_node = of_parse_phandle(np, "ssi-controller", 0);
-	if (!dai->cpu_of_node) {
-		ret = -EINVAL;
-		goto fail;
-	}
+	dai->cpu_of_node = cpu_np;
 
 	/* Only set the platform_of_node if the platform_name is not set */
 	if (!dai->platform_name)
