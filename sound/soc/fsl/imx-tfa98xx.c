@@ -49,8 +49,6 @@ static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_card *soc_card = rtd->card;
-	struct snd_soc_card_drvdata_imx_tfa *drvdata =
-		snd_soc_card_get_drvdata(soc_card);
 	int ret;
 
 	ret = snd_pcm_hw_constraint_list(substream->runtime, 0,
@@ -69,7 +67,6 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_card_drvdata_imx_tfa *data = snd_soc_card_get_drvdata(rtd->card);
 	u32 channels = params_channels(params);
 	struct snd_soc_dai *codec_dai;
-	unsigned long mclk_freq;
 	unsigned int fmt;
 	int i, ret;
 
@@ -165,14 +162,13 @@ static struct snd_soc_card imx_tfa98xx_soc_card = {
 static int imx_tfa98xx_probe(struct platform_device *pdev)
 {
 	struct device_node *cpu_np, *np = pdev->dev.of_node;
-	struct device_node *codec_np_0, *codec_np_1 = NULL;
+	struct device_node *codec_np_0 = NULL, *codec_np_1 = NULL;
 	struct snd_soc_dai_link_component *codecs = NULL;
 	struct platform_device *cpu_pdev;
 	struct snd_soc_dai_link *dai;
 	struct i2c_client *codec_dev;
 	struct snd_soc_card_drvdata_imx_tfa *drvdata = NULL;
 	int ret = 0;
-	int i, num_codecs;
 
 	pr_info("\n");
 
