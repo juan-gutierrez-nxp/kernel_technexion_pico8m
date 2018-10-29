@@ -103,15 +103,6 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 		}
 	}
 
-	/* TODO: fixed mclk ratio */
-	mclk_freq = params_rate(params) * channels * 32;
-	ret = snd_soc_dai_set_sysclk(cpu_dai, FSL_SAI_CLK_MAST1, mclk_freq,
-			SND_SOC_CLOCK_OUT);
-	if (ret < 0) {
-		dev_err(cpu_dai->dev,
-			"fail to set mclk rate: %lu\n", mclk_freq);
-	}
-
 	return ret;
 }
 
