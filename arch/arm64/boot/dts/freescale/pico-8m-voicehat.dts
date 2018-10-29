@@ -35,10 +35,7 @@
 		audio-codec = <&tfa98xx_left>, <&tfa98xx_right>;
 		nxp,audio-routing =
 			"Speaker", "OUTL",
-			"DMIC1", "Mic",
-			"DMIC2", "Mic",
-			"DMIC3", "Mic",
-			"DMIC4", "Mic";
+			"DMIC", "AEC Loopback";
 	};
 
 	sound@2 {
