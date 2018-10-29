@@ -32,8 +32,6 @@
 #include <asm/dma.h>
 #include <asm-generic/types.h>
 
-#define DAI_NAME_SIZE	32
-
 static u32 imx_tfa98xx_rates[] = { 8000, 16000, 32000, 44100, 48000 };
 static struct snd_pcm_hw_constraint_list imx_tfa98xx_rate_constraints = {
 	.count = ARRAY_SIZE(imx_tfa98xx_rates),
@@ -43,8 +41,7 @@ static struct snd_pcm_hw_constraint_list imx_tfa98xx_rate_constraints = {
 struct snd_soc_card_drvdata_imx_tfa {
 	struct snd_soc_dai_link *dai;
 	struct snd_soc_card card;
-	struct snd_soc_codec_conf *codec_conf;
-	int num_codec_conf;
+	int num_codecs;
 };
 
 static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
@@ -124,22 +121,15 @@ static void *tfa_devm_kstrdup(struct device *dev, char *buf)
  * filled with data from dt node.
  */
 
-static struct snd_soc_dai_link_component tfa98xx_codecs[] = {
+static struct snd_soc_dai_link imx_dai_tfa98xx[] = {
 	{
-		.dai_name = "tfa98xx-aif",
+		.name = "tfa98xx",
+		.stream_name = "Audio",
+		.ops = &imx_tfa98xx_ops,
 	},
 	{
-		.dai_name = "tfa98xx-aif",
-	}
-};
-
-static struct snd_soc_dai_link imx_dai_tfa98xx = {
-	.name = "tfa98xx",
-	.stream_name = "Audio",
-	.codecs = tfa98xx_codecs,
-	.num_codecs = 2,
-	.ignore_pmdown_time = 1,
-	.ops = &imx_tfa98xx_ops,
+		/* sentinel */
+	},
 };
 
 static const struct of_device_id imx_tfa98_dt_ids[] = {
@@ -152,18 +142,15 @@ static const struct of_device_id imx_tfa98_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, imx_tfa98_dt_ids);
 
 static const struct snd_soc_dapm_widget imx_tfa98xx_widgets[] = {
-	SND_SOC_DAPM_SPK("Speaker", NULL),
-	SND_SOC_DAPM_MIC("Mic", NULL),
-};
-
-static const struct snd_kcontrol_new imx_tfa98xx_controls[] = {
+	SND_SOC_DAPM_LINE("Speaker", NULL),
+	SND_SOC_DAPM_LINE("DMIC", NULL),
 };
 
 static struct snd_soc_card imx_tfa98xx_soc_card = {
 	.owner = THIS_MODULE,
 	.name = "TFA9912",	/* default name if none defined in DT */
-	.controls = imx_tfa98xx_controls,
-	.num_controls = ARRAY_SIZE(imx_tfa98xx_controls),
+	.dai_link = imx_dai_tfa98xx,
+	.num_links = ARRAY_SIZE(imx_dai_tfa98xx),
 	.dapm_widgets = imx_tfa98xx_widgets,
 	.num_dapm_widgets = ARRAY_SIZE(imx_tfa98xx_widgets),
 };
@@ -172,8 +159,9 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 {
 	struct device_node *cpu_np, *np = pdev->dev.of_node;
 	struct device_node *codec_np_0, *codec_np_1 = NULL;
+	struct snd_soc_dai_link_component *codecs = NULL;
 	struct platform_device *cpu_pdev;
-	struct snd_soc_dai_link_component *codecs;
+	struct snd_soc_dai_link *dai;
 	struct i2c_client *codec_dev;
 	struct snd_soc_card_drvdata_imx_tfa *drvdata = NULL;
 	int ret = 0;
@@ -231,15 +219,26 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 		goto fail;
 	}
 
-	drvdata->num_codec_conf = 2;
-	drvdata->codec_conf = devm_kzalloc(&pdev->dev,
-		drvdata->num_codec_conf * sizeof(struct snd_soc_codec_conf),
+	drvdata->num_codecs = 2;
+	codecs = devm_kzalloc(&pdev->dev,
+		drvdata->num_codecs * sizeof(struct snd_soc_dai_link_component),
 		GFP_KERNEL);
-
-	if (!drvdata->codec_conf) {
+	if (!codecs) {
 		ret = -ENOMEM;
 		goto fail;
 	}
+
+	codecs[0].of_node = codec_np_0;
+	codecs[0].dai_name = "tfa98xx-aif-1-34";
+	codecs[1].of_node = codec_np_1;
+	codecs[1].dai_name = "tfa98xx-aif-1-35";
+
+	dai = &imx_dai_tfa98xx[0];
+	dai->platform_of_node = cpu_np;
+	dai->codecs = codecs;
+	dai->cpu_dai_name = dev_name(&cpu_pdev->dev);
+	dai->num_codecs = 2;
+	dai->cpu_of_node = cpu_np;
 
 	ret = snd_soc_of_parse_card_name(&imx_tfa98xx_soc_card, "nxp,model");
 	if (ret)
@@ -249,25 +248,9 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	if (ret)
 		goto fail;
 
-	drvdata->codec_conf[0].name_prefix = "0";
-	drvdata->codec_conf[0].of_node = codec_np_0;
-	drvdata->codec_conf[1].name_prefix = "1";
-	drvdata->codec_conf[2].of_node = codec_np_1;
-
-	tfa98xx_codecs[0].of_node = codec_np_0;
-	tfa98xx_codecs[1].of_node = codec_np_1;
-	/* TODO: reimplememt */
-	tfa98xx_codecs[0].dai_name = "tfa98xx-aif-1-34";
-	tfa98xx_codecs[1].dai_name = "tfa98xx-aif-1-35";
-
-	imx_dai_tfa98xx.cpu_dai_name = dev_name(&cpu_pdev->dev);
-	imx_dai_tfa98xx.platform_of_node = cpu_np;
-
 	imx_tfa98xx_soc_card.num_links = 1;
-	imx_tfa98xx_soc_card.dai_link = &imx_dai_tfa98xx;
+	imx_tfa98xx_soc_card.dai_link = dai;
 	imx_tfa98xx_soc_card.owner = THIS_MODULE;
-	imx_tfa98xx_soc_card.codec_conf = drvdata->codec_conf;
-	imx_tfa98xx_soc_card.num_configs = drvdata->num_codec_conf;
 
 	platform_set_drvdata(pdev, &drvdata->card);
 	snd_soc_card_set_drvdata(&imx_tfa98xx_soc_card, drvdata);
