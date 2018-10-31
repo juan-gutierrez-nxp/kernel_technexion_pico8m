@@ -70,7 +70,7 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 	unsigned int fmt;
 	int i, ret;
 
-	fmt = SND_SOC_DAIFMT_DSP_B | SND_SOC_DAIFMT_NB_NF |
+	fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
 		SND_SOC_DAIFMT_CBS_CFS;
 
 	/* set cpu DAI configuration */
@@ -86,9 +86,6 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 		dev_err(cpu_dai->dev, "failed to set cpu dai tdm slot: %d\n", ret);
 		return ret;
 	}
-
-	fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
-		SND_SOC_DAIFMT_CBS_CFS;
 
 	for (i = 0; i < rtd->num_codecs; i++) {
 		codec_dai = rtd->codec_dais[i];
