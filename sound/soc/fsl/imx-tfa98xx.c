@@ -80,13 +80,6 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 		return ret;
 	}
 
-	ret = snd_soc_dai_set_tdm_slot(cpu_dai, BIT(channels) -1,
-			BIT(channels) - 1, 2, params_width(params));
-	if (ret) {
-		dev_err(cpu_dai->dev, "failed to set cpu dai tdm slot: %d\n", ret);
-		return ret;
-	}
-
 	for (i = 0; i < rtd->num_codecs; i++) {
 		codec_dai = rtd->codec_dais[i];
 		ret = snd_soc_dai_set_fmt(codec_dai, fmt);
