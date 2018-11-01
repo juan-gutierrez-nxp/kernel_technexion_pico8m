@@ -24,10 +24,6 @@
 		i2c3 = &i2c4;
 	};
 
-	sound_record: codec {
-		compatible = "knowles,sph0645";
-	};
-
 	sound@1 {
 		compatible = "nxp,imx-audio-tfa98xx", "nxp,imx-tfa98xx";
 		nxp,model = "TFA9912";
@@ -39,10 +35,9 @@
 	};
 
 	sound@2 {
-		compatible = "nxp,imx-audio-sph0645", "nxp,imx-sph0645";
+		compatible = "fsl,imx-audio-sph064x";
 		model = "SPH0645";
 		audio-cpu = <&sai3>;
-		audio-codec = <&sound_record>;
 	};
 };
 
@@ -183,7 +178,7 @@
 	assigned-clocks = <&clk IMX8MQ_CLK_SAI3_SRC>,
 		<&clk IMX8MQ_CLK_SAI3_DIV>;
 	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
-	assigned-clock-rates = <0>, <24576000>;
+	assigned-clock-rates = <0>, <49152000>;
 	status = "okay";
 };
 
