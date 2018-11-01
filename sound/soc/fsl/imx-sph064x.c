@@ -17,10 +17,12 @@
 
 #include "fsl_sai.h"
 
+#define IMX_SPH064X_FMTBIT \
+	(SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S16_LE)
+
 struct imx_sph064x_data {
 	struct snd_soc_dai_link dai;
 	struct snd_soc_card card;
-	unsigned int decimation;
 };
 
 static u32 imx_sph064x_rates[] = { 32000, 48000, 64000 };
@@ -53,7 +55,15 @@ static int imx_sph064x_startup(struct snd_pcm_substream *substream)
 		SNDRV_PCM_HW_PARAM_CHANNELS, &imx_sph064x_channels_constrains);
 	if (ret) {
 		dev_err(card->dev,
-			"fail to set pcm hw channels constrains: %d", ret);
+			"fail to set pcm hw channels constrains: %d\n", ret);
+		return ret;
+	}
+
+	ret = snd_pcm_hw_constraint_mask64(runtime, SNDRV_PCM_HW_PARAM_FORMAT,
+			IMX_SPH064X_FMTBIT);
+	if (ret) {
+		dev_err(card->dev,
+			"fail to set pcm hw format constrains: %d\n", ret);
 		return ret;
 	}
 
@@ -66,22 +76,21 @@ static int imx_sph064x_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 	struct snd_soc_card *card = rtd->card;
-	struct imx_sph064x_data *data = snd_soc_card_get_drvdata(card);
-	unsigned int bitclk = params_rate(params) * data->decimation;
+	unsigned int fmt;
 	int ret;
 
+	fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | \
+		SND_SOC_DAIFMT_CBS_CFS;
 	/* set cpu dai format configuration */
-	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S |
-			SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFM);
+	ret = snd_soc_dai_set_fmt(cpu_dai, fmt);
 	if (ret) {
 		dev_err(card->dev, "fail to set cpu dai fmt: %d\n", ret);
 		return ret;
 	}
-	/* Set clock out */
-	ret = snd_soc_dai_set_sysclk(cpu_dai, FSL_SAI_CLK_BIT,
-			bitclk, SND_SOC_CLOCK_OUT);
+
+	ret = snd_soc_dai_set_tdm_slot(cpu_dai, 0, 0, 2, 32);
 	if (ret) {
-		dev_err(card->dev, "fail to set cpu sysclk: %d\n", ret);
+		dev_err(card->dev, "fail to set cpu dai tdm slots: %d\n", ret);
 		return ret;
 	}
 
@@ -121,19 +130,12 @@ static int imx_sph064x_probe(struct platform_device *pdev)
 		goto fail;
 	}
 
-	ret = of_property_read_u32(np, "decimation", &data->decimation);
-	if (ret < 0) {
-		ret = -EINVAL;
-		goto fail;
-	}
-
 	data->dai.name = "sph064x hifi";
 	data->dai.stream_name = "sph064x hifi";
 	data->dai.codec_dai_name = "snd-soc-dummy-dai";
 	data->dai.codec_name = "snd-soc-dummy";
 	data->dai.cpu_dai_name = dev_name(&cpu_pdev->dev);
 	data->dai.platform_of_node = cpu_np;
-	data->dai.capture_only = "true";
 	data->dai.ops = &imx_sph064x_ops;
 
 	data->card.dev = &pdev->dev;
