@@ -137,6 +137,7 @@ static int imx_sph064x_probe(struct platform_device *pdev)
 	data->dai.cpu_dai_name = dev_name(&cpu_pdev->dev);
 	data->dai.platform_of_node = cpu_np;
 	data->dai.ops = &imx_sph064x_ops;
+	data->dai.capture_only = "true";
 
 	data->card.dev = &pdev->dev;
 	data->card.owner = THIS_MODULE;
