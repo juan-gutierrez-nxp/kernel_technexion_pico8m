@@ -120,15 +120,6 @@ static struct snd_soc_dai_link imx_dai_tfa98xx[] = {
 	},
 };
 
-static const struct of_device_id imx_tfa98_dt_ids[] = {
-	{
-		.compatible = "nxp,imx-audio-tfa98xx",
-		.data = &imx_dai_tfa98xx,
-	},
-	{ /* sentinel */ }
-};
-MODULE_DEVICE_TABLE(of, imx_tfa98_dt_ids);
-
 static const struct snd_soc_dapm_widget imx_tfa98xx_widgets[] = {
 	SND_SOC_DAPM_LINE("Speaker", NULL),
 	SND_SOC_DAPM_LINE("DMIC", NULL),
@@ -145,7 +136,7 @@ static struct snd_soc_card imx_tfa98xx_soc_card = {
 
 static int imx_tfa98xx_probe(struct platform_device *pdev)
 {
-	struct device_node *cpu_np, *np = pdev->dev.of_node;
+	struct device_node *cpu_np = NULL, *np = pdev->dev.of_node;
 	struct device_node *codec_np_0 = NULL, *codec_np_1 = NULL;
 	struct snd_soc_dai_link_component *codecs = NULL;
 	struct platform_device *cpu_pdev;
@@ -225,11 +216,11 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	dai->num_codecs = 2;
 	dai->cpu_of_node = cpu_np;
 
-	ret = snd_soc_of_parse_card_name(&imx_tfa98xx_soc_card, "nxp,model");
+	ret = snd_soc_of_parse_card_name(&imx_tfa98xx_soc_card, "model");
 	if (ret)
 		goto fail;
 
-	ret = snd_soc_of_parse_audio_routing(&imx_tfa98xx_soc_card, "nxp,audio-routing");
+	ret = snd_soc_of_parse_audio_routing(&imx_tfa98xx_soc_card, "audio-routing");
 	if (ret)
 		goto fail;
 
@@ -259,13 +250,20 @@ fail:
 static int imx_tfa98xx_remove(struct platform_device *pdev)
 {
 	struct snd_soc_card *card = platform_get_drvdata(pdev);
-	struct snd_soc_card_drvdata_imx_tfa *drvdata =
-				snd_soc_card_get_drvdata(card);
-
 	/* unregister card */
 	snd_soc_unregister_card(card);
+
 	return 0;
 }
+
+static const struct of_device_id imx_tfa98_dt_ids[] = {
+	{
+		.compatible = "fsl,imx-audio-tfa98xx",
+		.data = &imx_dai_tfa98xx,
+	},
+	{ /* sentinel */ }
+};
+MODULE_DEVICE_TABLE(of, imx_tfa98_dt_ids);
 
 static struct platform_driver imx_tfa98xx_driver = {
 	.probe		= imx_tfa98xx_probe,
