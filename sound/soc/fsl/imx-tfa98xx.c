@@ -19,7 +19,13 @@
 
 #include "fsl_sai.h"
 
-static u32 imx_tfa98xx_rates[] = { 8000, 16000, 32000, 44100, 48000 };
+static u32 imx_tfa98xx_channels[] = { 1, 2 };
+static struct snd_pcm_hw_constraint_list imx_tfa98xx_channels_constrains = {
+	.count = ARRAY_SIZE(imx_tfa98xx_channels),
+	.list = imx_tfa98xx_channels,
+};
+
+static u32 imx_tfa98xx_rates[] = { 16000, 32000, 48000 };
 static struct snd_pcm_hw_constraint_list imx_tfa98xx_rate_constraints = {
 	.count = ARRAY_SIZE(imx_tfa98xx_rates),
 	.list = imx_tfa98xx_rates,
@@ -34,13 +40,23 @@ struct snd_soc_card_drvdata_imx_tfa {
 static int imx_tfa98xx_startup(struct snd_pcm_substream *substream)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_card *soc_card = rtd->card;
+	struct snd_soc_card *card = rtd->card;
 	int ret;
 
 	ret = snd_pcm_hw_constraint_list(substream->runtime, 0,
 			SNDRV_PCM_HW_PARAM_RATE, &imx_tfa98xx_rate_constraints);
-	if (ret)
+	if (ret) {
+		dev_err(card->dev, "fail to set rate constrains\n");
 		return ret;
+	}
+
+	ret = snd_pcm_hw_constraint_list(substream->runtime, 0,
+			SNDRV_PCM_HW_PARAM_CHANNELS,
+			&imx_tfa98xx_channels_constrains);
+	if (ret) {
+		dev_err(card->dev, "fail to set rate constrains\n");
+		return ret;
+	}
 
 	return 0;
 }
@@ -50,8 +66,6 @@ static int imx_tfa98xx_hw_params(struct snd_pcm_substream *substream,
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
-	struct snd_soc_card_drvdata_imx_tfa *data = snd_soc_card_get_drvdata(rtd->card);
-	u32 channels = params_channels(params);
 	struct snd_soc_dai *codec_dai;
 	unsigned int fmt;
 	int i, ret;
