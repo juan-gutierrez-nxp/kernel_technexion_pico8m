@@ -1,36 +1,22 @@
 /*
- * ASoC driver for BBB + NXP TFA98xx family of devices
+ * Copyright 2018 NXP.
  *
- * Author:      Sebastien Jan <sjan@baylibre.com>
- * Copyright (C) 2015 NXP
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
  */
 
-#define DEBUG
-#define pr_fmt(fmt) "%s(): " fmt, __func__
-
 #include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/timer.h>
-#include <linux/interrupt.h>
-#include <linux/platform_device.h>
+#include <linux/init.h>
+#include <linux/slab.h>
+#include <linux/of_device.h>
 #include <linux/i2c.h>
-#include <linux/of_platform.h>
-#include <linux/clk.h>
-#include <linux/clk-provider.h>
-#include <sound/core.h>
-#include <sound/pcm.h>
-#include <sound/soc.h>
 #include <sound/pcm_params.h>
-#include <sound/jack.h>
-#include <linux/of_gpio.h>
-#include <linux/delay.h>
+#include <sound/soc.h>
 
-#include <asm/dma.h>
-#include <asm-generic/types.h>
 #include "fsl_sai.h"
 
 static u32 imx_tfa98xx_rates[] = { 8000, 16000, 32000, 44100, 48000 };
@@ -109,12 +95,6 @@ static void *tfa_devm_kstrdup(struct device *dev, char *buf)
 	return str;
 }
 
-#if defined(CONFIG_OF)
-/*
- * The structs are used as place holders. They will be completely
- * filled with data from dt node.
- */
-
 static struct snd_soc_dai_link imx_dai_tfa98xx[] = {
 	{
 		.name = "tfa98xx",
@@ -159,8 +139,6 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	struct i2c_client *codec_dev;
 	struct snd_soc_card_drvdata_imx_tfa *drvdata = NULL;
 	int ret = 0;
-
-	pr_info("\n");
 
 	imx_tfa98xx_soc_card.dev = &pdev->dev;
 
@@ -252,7 +230,6 @@ static int imx_tfa98xx_probe(struct platform_device *pdev)
 	if (ret)
 		dev_err(&pdev->dev, "snd_soc_register_card failed (%d)\n", ret);
 
-	pr_info("done\n");
 	return ret;
 fail:
 	if (cpu_np)
@@ -271,7 +248,8 @@ static int imx_tfa98xx_remove(struct platform_device *pdev)
 	struct snd_soc_card_drvdata_imx_tfa *drvdata =
 				snd_soc_card_get_drvdata(card);
 
-
+	/* unregister card */
+	snd_soc_unregister_card(card);
 	return 0;
 }
 
@@ -285,30 +263,8 @@ static struct platform_driver imx_tfa98xx_driver = {
 		.of_match_table = of_match_ptr(imx_tfa98_dt_ids),
 	},
 };
-#endif
+module_platform_driver(imx_tfa98xx_driver);
 
-static int __init _tfa98xx_init(void)
-{
-#if defined(CONFIG_OF)
-	if (of_have_populated_dt())
-		return platform_driver_register(&imx_tfa98xx_driver);
-#endif
-	return 0;
-}
-
-static void __exit _tfa98xx_exit(void)
-{
-#if defined(CONFIG_OF)
-	if (of_have_populated_dt()) {
-		platform_driver_unregister(&imx_tfa98xx_driver);
-		return;
-	}
-#endif
-}
-
-module_init(_tfa98xx_init);
-module_exit(_tfa98xx_exit);
-
-MODULE_AUTHOR("Jerry Yoon");
-MODULE_DESCRIPTION("i.MX7d TFA98XX ASoC driver");
-MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("NXP i.MX tfa98xx ASoC machine driver");
+MODULE_LICENSE("GPL v2");
+MODULE_ALIAS("platform:imx-tfa98xx");
