@@ -25,11 +25,11 @@
 	};
 
 	sound@1 {
-		compatible = "nxp,imx-audio-tfa98xx", "nxp,imx-tfa98xx";
-		nxp,model = "TFA9912";
+		compatible = "fsl,imx-audio-tfa98xx";
+		model = "TFA9912";
 		audio-cpu = <&sai2>;
 		audio-codec = <&tfa98xx_left>, <&tfa98xx_right>;
-		nxp,audio-routing =
+		audio-routing =
 			"Speaker", "OUTL",
 			"DMIC", "AEC Loopback";
 	};
