@@ -18,7 +18,9 @@
 #include "fsl_sai.h"
 
 #define IMX_SPH064X_FMTBIT \
-	(SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S16_LE)
+	(SNDRV_PCM_FMTBIT_S32_LE | \
+	 SNDRV_PCM_FMTBIT_S24_LE | \
+	 SNDRV_PCM_FMTBIT_S16_LE)
 
 struct imx_sph064x_data {
 	struct snd_soc_dai_link dai;
